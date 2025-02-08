@@ -52,22 +52,37 @@ func fishStruggle(over *int, sCh chan bool) {
 	// 110, 64, 85
 	// 1159, 463
 	fmt.Println("fishStruggle: 开始监控鱼挣扎情况！！")
-	var fish = config.Conf.StruggleColor
+	// var fish = config.Conf.StruggleColor
 	var fishLocation = config.Conf.StruggleLocation
 
-	oldColor := getRGBbyLocation(fishLocation[0], fishLocation[1]) // 初始值
+	// oldColor := getRGBbyLocation(fishLocation[0], fishLocation[1]) // 初始值
 	for {
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(5 * time.Millisecond)
+
+		iStruggle := true
 		color := getRGBbyLocation(fishLocation[0], fishLocation[1])
-		if color.Range(fish) { // 颜色范围
-			fmt.Println("fishStruggle：检测三元色差 鱼挣扎~")
+		//if color.Range(fish) { // 颜色范围
+		//    fmt.Println("fishStruggle：检测三元色差 鱼挣扎~")
+		//    sCh <- true
+		//}
+
+		if color.Red > 110 && color.Green < 100 && color.Blue < 100 && iStruggle {
+			fmt.Println("fishStruggle：检测100分界 鱼挣扎~")
+			iStruggle = false
 			sCh <- true
 		}
 
-		if abs(oldColor.Red-color.Red) > 15 { // R的差值
-			fmt.Println("fishStruggle：检测红元色差 鱼挣扎~")
+		// 暗光场景
+		if color.Red > 80 && color.Green < 55 && color.Blue < 55 && iStruggle {
+			fmt.Println("fishStruggle：检测60分界 鱼挣扎~")
+			iStruggle = false
 			sCh <- true
 		}
+		// 过于敏感
+		//if abs(oldColor.Red-color.Red) > 15 { // R的差值
+		//	fmt.Println("fishStruggle：检测红元色差 鱼挣扎~")
+		//	sCh <- true
+		//}
 
 		if *over == 1 { // 关闭
 			fmt.Printf("fishStruggle：over, sCh通道关闭~\n")
@@ -137,14 +152,14 @@ func Run(times int) {
 		time.Sleep(500 * time.Millisecond)
 		_ = robotgo.KeyToggle("space", "up")
 
-		time.Sleep(20 * time.Second)
+		time.Sleep(12 * time.Second)
 		fmt.Println("开始拉！")
 		_ = robotgo.KeyToggle("space", "down")
 		time.Sleep(200 * time.Millisecond)
 		_ = robotgo.KeyToggle("space", "up")
 
 		Fishing()
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
