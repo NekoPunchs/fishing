@@ -25,7 +25,7 @@ func Abs(value int) int {
 // Range
 // Color 与 oC 的RGB相差上下不超过5时返回 Ture
 func (c Color) Range(oC Color) bool {
-	deviation := 50
+	deviation := 60
 	r := Abs(c.Red - oC.Red)
 	g := Abs(c.Green - oC.Green)
 	b := Abs(c.Blue - oC.Blue)

@@ -61,14 +61,14 @@ func (fish *Fish) fishStruggle() {
 	// 1159, 463
 	fmt.Println("fishStruggle: 开始监控鱼挣扎情况！！")
 	var struggleLocation = config.Conf.StruggleLocation
-	color := common.GetRGBbyLocation(struggleLocation[0], struggleLocation[1])
+
 	for {
 		time.Sleep(5 * time.Millisecond)
 
 		if fish.pause == 1 { // 关闭
 			continue
 		}
-		
+		color := common.GetRGBbyLocation(struggleLocation[0], struggleLocation[1])
 		for i := 0; i < len(fish.struggleColors); i++ {
 			c := fish.struggleColors[i]
 			if color.Red > c.Red && color.Green < c.Green && color.Blue < c.Blue {
