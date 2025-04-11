@@ -1,5 +1,6 @@
-Start-Process -FilePath "fishing.exe"
+$proc = Start-Process fishing.exe -PassThru
 Start-Sleep -Seconds 5
+$handle = (Get-Process -Id $proc.Id).MainWindowHandle
 $signature = @'
 [DllImport("user32.dll")]
 public static extern bool SetWindowPos(
@@ -12,6 +13,5 @@ public static extern bool SetWindowPos(
     uint uFlags);
 '@
 $type = Add-Type -MemberDefinition $signature -Name SetWindowPosition -Namespace SetWindowPos -Using System.Text -PassThru
-$handle = (Get-Process -Name "fishing").MainWindowHandle
 $alwaysOnTop = New-Object -TypeName System.IntPtr -ArgumentList (-1)
 $type::SetWindowPos($handle, $alwaysOnTop, 0, 0, 0, 0, 0x0003)
