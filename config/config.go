@@ -9,9 +9,10 @@ var Conf Config
 
 type Config struct {
 	// 钓鱼状态定位
-	Wkk          string
-	FishLocation []int
-	FishColor    Color
+	Wkk               string
+	BeginFishLocation []int
+	FishLocation      []int
+	FishColor         Color
 	// 挣扎定位及颜色
 	StruggleLocation []int
 	StruggleColor    Color

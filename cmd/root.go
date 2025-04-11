@@ -20,7 +20,6 @@ Let you free your hands and enjoy fishing in the world of Zhu Xian.`,
 
 func Execute() {
 	rootCmd.PersistentFlags().IntVarP(&times, "times", "t", 50, "fishing times")
-
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

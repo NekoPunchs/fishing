@@ -10,33 +10,31 @@ import (
 
 // 状态判断 控制甩勾
 // sCh chan bool
-func fishStatus(over *int, fCh chan bool) {
+func fishStatusListener(over *int, fCh chan bool) {
 	// 211 218 215
-	var fish = config.Conf.FishColor // 目标颜色
+	fish := config.Conf.FishColor // 目标颜色
 	// 1220, 224
-	var fishLocation = config.Conf.FishLocation
+	fishLocation := config.Conf.FishLocation
 
-	var c int
-	fmt.Println("fishStatus: 开始监控钓鱼生命周期！")
+	fmt.Println("fishStatusListener: 开始监控钓鱼生命周期！")
 
 	defer func() {
-		fmt.Printf("fishStatus：over, fCh通道关闭~\n")
+		fmt.Printf("fishStatusListener：over, fCh通道关闭~\n")
 		close(fCh)
 	}()
-
+	const MAX_COUNT = 5
+	c := 0
 	for {
 		color := getRGBbyLocation(fishLocation[0], fishLocation[1])
-		// fmt.Printf("fishStatus: %v\n", color)
 		if color.Range(fish) {
-			fmt.Println("fishStatus：拉杆中~")
+			fmt.Println("fishStatusListener：拉杆中~")
 		} else {
-			fmt.Printf("fishStatus：停止拉杆~ %d\n", c)
+			fmt.Printf("fishStatusListener：状态检测计数 %d/%d\n", c, MAX_COUNT)
 			c++
-			if c > 3 {
+			if c > MAX_COUNT {
 				fCh <- true
 				return
 			}
-
 		}
 
 		if *over == 1 { // 关闭
@@ -52,21 +50,14 @@ func fishStruggle(over *int, sCh chan bool) {
 	// 110, 64, 85
 	// 1159, 463
 	fmt.Println("fishStruggle: 开始监控鱼挣扎情况！！")
-	// var fish = config.Conf.StruggleColor
-	var fishLocation = config.Conf.StruggleLocation
-
-	// oldColor := getRGBbyLocation(fishLocation[0], fishLocation[1]) // 初始值
+	var struggleLocation = config.Conf.StruggleLocation
 	for {
 		time.Sleep(5 * time.Millisecond)
 
 		iStruggle := true
-		color := getRGBbyLocation(fishLocation[0], fishLocation[1])
-		//if color.Range(fish) { // 颜色范围
-		//    fmt.Println("fishStruggle：检测三元色差 鱼挣扎~")
-		//    sCh <- true
-		//}
+		color := getRGBbyLocation(struggleLocation[0], struggleLocation[1])
 
-		if color.Red > 110 && color.Green < 100 && color.Blue < 100 && iStruggle {
+		if color.Red > 110 && color.Green < 100 && color.Blue < 100 {
 			fmt.Println("fishStruggle：检测100分界 鱼挣扎~")
 			iStruggle = false
 			sCh <- true
@@ -92,19 +83,27 @@ func fishStruggle(over *int, sCh chan bool) {
 	}
 }
 
+func CheckBeginFish() bool {
+	var location = config.Conf.BeginFishLocation
+	color := getRGBbyLocation(location[0], location[1])
+	var targetColor = config.Conf.FishColor
+	return color.Range(targetColor)
+}
+
 // KeyboardSimulation 模拟按键
 // 接收到第一个拉杆进入钓鱼循环
 func KeyboardSimulation(sCH chan bool) {
+	defer func() {
+		_ = robotgo.KeyToggle("space", "up")
+	}()
+
 	for {
 		fmt.Println("Key：拉勾")
-
 		_ = robotgo.KeyToggle("space", "down")
-		v, ok := <-sCH
+		_, ok := <-sCH
 		if !ok {
 			break
 		}
-		println(v)
-
 		// 50 有点鬼畜 效果还可以
 		time.Sleep(100 * time.Millisecond)
 		fmt.Println("Key：松手")
@@ -122,9 +121,9 @@ func Fishing() {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute) // 函数超时
 	defer cancel()
 
-	go KeyboardSimulation(sCh)  // 拉或者松
-	go fishStruggle(&over, sCh) // 挣扎
-	go fishStatus(&over, fCh)   // 控制一次钓鱼的生命周期
+	go KeyboardSimulation(sCh)        // 拉或者松
+	go fishStruggle(&over, sCh)       // 挣扎
+	go fishStatusListener(&over, fCh) // 控制一次钓鱼的生命周期
 
 	select {
 	case <-ctx.Done():
@@ -144,19 +143,32 @@ func Run(times int) {
 		// 甩杆
 		fmt.Printf("Run: 第 %d 次甩杆！\n", i)
 
-		_ = robotgo.KeyToggle("space", "down")
-		time.Sleep(500 * time.Millisecond)
-		_ = robotgo.KeyToggle("space", "up")
+		c := 0
+		for {
+			time.Sleep(500 * time.Millisecond)
+			if CheckBeginFish() {
+				break
+			} else {
+				c++
+				if c > 10 {
+					break
+				}
+			}
+		}
 
-		_ = robotgo.KeyToggle("space", "down")
-		time.Sleep(500 * time.Millisecond)
-		_ = robotgo.KeyToggle("space", "up")
-
-		time.Sleep(12 * time.Second)
-		fmt.Println("开始拉！")
-		_ = robotgo.KeyToggle("space", "down")
+		fmt.Println("甩杆")
+		_ = robotgo.KeyToggle(robotgo.Space, "down")
 		time.Sleep(200 * time.Millisecond)
-		_ = robotgo.KeyToggle("space", "up")
+		_ = robotgo.KeyToggle(robotgo.Space, "up")
+
+		fmt.Println("甩杆等待")
+		time.Sleep(5 * time.Second) // 甩杆等待
+		fmt.Println("上钩等待")
+		time.Sleep(10 * time.Second) // 上钩等待
+		fmt.Println("开始拉！")
+		_ = robotgo.KeyToggle(robotgo.Space, "down")
+		time.Sleep(200 * time.Millisecond)
+		_ = robotgo.KeyToggle(robotgo.Space, "up")
 
 		Fishing()
 		time.Sleep(5 * time.Second)

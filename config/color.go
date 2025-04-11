@@ -11,19 +11,25 @@ type Color struct {
 	Blue  int
 }
 
+func InRange(value int, min int, max int) bool {
+	return value >= min && value <= max
+}
+
+func Abs(value int) int {
+	if value < 0 {
+		return -value
+	}
+	return value
+}
+
 // Range
 // Color 与 oC 的RGB相差上下不超过5时返回 Ture
 func (c Color) Range(oC Color) bool {
-	deviation := 20
-	// fmt.Println(c, oC) // 调试
-	if oC.Red-deviation < c.Red && c.Red < oC.Red+deviation {
-		if oC.Green-deviation < c.Green && c.Green < oC.Green+deviation {
-			if oC.Blue-deviation < c.Blue && c.Blue < oC.Blue+deviation {
-				return true
-			}
-		}
-	}
-	return false
+	deviation := 50
+	r := Abs(c.Red - oC.Red)
+	g := Abs(c.Green - oC.Green)
+	b := Abs(c.Blue - oC.Blue)
+	return InRange(r+g+b, 0, deviation)
 }
 
 func HexToRGB(color string) Color {

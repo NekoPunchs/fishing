@@ -1,19 +1,22 @@
 fish:
+  BeginFishLocation:
+    - 925
+    - 825
+
   # 1220, 224
   FishLocation:
-    - 1220
-    - 224
-
+    - 908
+    - 173
   # 211 218 215
   FishColor:
-    red:   211
+    red:   231
     green: 218
-    blue:  215
+    blue:  216
 
   # 1159, 463
   StruggleLocation:
-    - 1258
-    - 463
+    - 1048
+    - 357
 
   #  110, 64, 85
   StruggleColor:
