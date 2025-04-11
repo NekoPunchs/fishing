@@ -1,4 +1,5 @@
 Start-Process -FilePath "fishing.exe"
+Start-Sleep -Seconds 5
 $signature = @'
 [DllImport("user32.dll")]
 public static extern bool SetWindowPos(
